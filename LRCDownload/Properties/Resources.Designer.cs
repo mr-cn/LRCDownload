@@ -59,30 +59,5 @@ namespace LRCDownload.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找类似 // Created by Elia &lt;elia.of.little@gmail.com&gt;
-        ///// Update 2016-08-09 19:36
-        ///// Require:
-        ///// - foobar2000 v1.3.3+ with ESLyric v0.3.5+
-        ///// Thanks: 
-        ///// - Moon for netease&apos;s api &gt;&gt;&gt; [http://moonlib.com/606.html]
-        ///// - ttsping for ESLyric and sample scripts
-        ///// - keperlia, ABC超人1, etc
-        /////
-        ///// Another NeteaseCloudMusicScript here:
-        /////  [http://tieba.baidu.com/p/4651402375?pn=1]
-        /////
-        ///// Issues || bug reports || advices are all encouraged!
-        ///
-        ///var header = {
-        ///    &apos;Referer&apos;: &apos;http://music.163.com/&apos;,
-        ///    &apos;Content-Ty [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string Netease {
-            get {
-                return ResourceManager.GetString("Netease", resourceCulture);
-            }
-        }
     }
 }

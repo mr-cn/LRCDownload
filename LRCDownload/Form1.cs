@@ -55,7 +55,7 @@ namespace LRCDownload
             {
                 var title = nextItem.SubItems[1].Text;
                 var artist = nextItem.SubItems[2].Text;
-                tasks.Add(Tuple.Create(Plugins.Netease.getLyric(artist, title), nextItem));
+                tasks.Add(Tuple.Create(Plugins.Netease.GetLyricAsync(artist, title), nextItem));
             }
             while (tasks.Count > 0)
             {
