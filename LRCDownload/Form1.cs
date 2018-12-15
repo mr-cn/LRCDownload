@@ -24,7 +24,10 @@ namespace LRCDownload
             listView1.Items.Clear();
             var theFolder = new DirectoryInfo(_deviceDirectory);
             var files = theFolder.GetFiles("*", SearchOption.AllDirectories)
-                .Where(file => file.Name.ToLower().EndsWith(".flac") || file.Name.ToLower().EndsWith(".m4a") || file.Name.ToLower().EndsWith(".wav") || file.Name.ToLower().EndsWith(".mp3"))
+                .Where(file => file.Name.ToLower().EndsWith(".flac"))
+                .Where(file => file.Name.ToLower().EndsWith(".m4a"))
+                .Where(file => file.Name.ToLower().EndsWith(".wav"))
+                .Where(file => file.Name.ToLower().EndsWith(".mp3"))
                 .ToList();
             foreach (var nextItem in files)
             {
