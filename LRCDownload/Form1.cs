@@ -9,67 +9,64 @@ namespace LRCDownload
 {
     public partial class Form1 : Form
     {
-        private string deviceDirectory;
+        private string _deviceDirectory;
 
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void btnSelect_Click(object sender, EventArgs e)
+        private void BtnSelect_Click(object sender, EventArgs e)
         {
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog1.ShowDialog() != DialogResult.OK)
+                return;
+            _deviceDirectory = folderBrowserDialog1.SelectedPath;
+            listView1.Items.Clear();
+            var theFolder = new DirectoryInfo(_deviceDirectory);
+            var files = theFolder.GetFiles("*", SearchOption.AllDirectories)
+                .Where(file => file.Name.ToLower().EndsWith(".flac") || file.Name.ToLower().EndsWith(".m4a") || file.Name.ToLower().EndsWith(".wav") || file.Name.ToLower().EndsWith(".mp3"))
+                .ToList();
+            foreach (var nextItem in files)
             {
-                deviceDirectory = folderBrowserDialog1.SelectedPath;
-                listView1.Items.Clear();
-                DirectoryInfo TheFolder = new DirectoryInfo(deviceDirectory);
-                var files = TheFolder.GetFiles("*", SearchOption.AllDirectories)
-                    .Where(file => file.Name.ToLower().EndsWith(".flac") || file.Name.ToLower().EndsWith(".m4a") || file.Name.ToLower().EndsWith(".wav") || file.Name.ToLower().EndsWith(".mp3"))
-                    .ToList();
-                foreach (FileInfo NextItem in files)
+                try
                 {
-                    try
-                    {
-                        var tfile = TagLib.File.Create(NextItem.FullName);
-                        string artist = tfile.Tag.AlbumArtists.Count() > 0 ? tfile.Tag.AlbumArtists[0] : tfile.Tag.Artists[0];
+                    var tfile = TagLib.File.Create(nextItem.FullName);
+                    var artist = tfile.Tag.AlbumArtists.Any() ? tfile.Tag.AlbumArtists[0] : tfile.Tag.Artists[0];
 
-                        var item = new ListViewItem("");
-                        item.SubItems.Add(tfile.Tag.Title);
-                        item.SubItems.Add(artist);
-                        item.SubItems.Add(NextItem.FullName);
-                        this.listView1.Items.Add(item);
-                    }
-                    catch (IndexOutOfRangeException ex)
-                    {
-
-                    }
+                    var item = new ListViewItem("");
+                    item.SubItems.Add(tfile.Tag.Title);
+                    item.SubItems.Add(artist);
+                    item.SubItems.Add(nextItem.FullName);
+                    listView1.Items.Add(item);
                 }
+                catch (IndexOutOfRangeException)
+                {  }
             }
         }
 
-        private async void btnDown_Click(object sender, EventArgs e)
+        private async void BtnDown_Click(object sender, EventArgs e)
         {
             btnDown.Enabled = false;
             var tasks = new List<Tuple<Task<string>, ListViewItem>>();
-            foreach (ListViewItem NextItem in listView1.Items)
+            foreach (ListViewItem nextItem in listView1.Items)
             {
-                string title = NextItem.SubItems[1].Text;
-                string artist = NextItem.SubItems[2].Text;
-                tasks.Add(Tuple.Create(Plugins.Netease.getLyric(artist, title), NextItem));
+                var title = nextItem.SubItems[1].Text;
+                var artist = nextItem.SubItems[2].Text;
+                tasks.Add(Tuple.Create(Plugins.Netease.getLyric(artist, title), nextItem));
             }
             while (tasks.Count > 0)
             {
                 var currentCompleted = await Task.WhenAny(tasks.Select(x => x.Item1).ToList());
                 var task = tasks.First(x => x.Item1.Equals(currentCompleted));
-                ListViewItem listViewItem = task.Item2;
+                var listViewItem = task.Item2;
                 try
                 {
-                    string lryrics = currentCompleted.Result;
-                    FileInfo mfile = new FileInfo(listViewItem.SubItems[3].Text);
-                    File.WriteAllText(string.Format(@"{0}/{1}.lrc", mfile.DirectoryName, Path.GetFileNameWithoutExtension(mfile.Name)), lryrics);
+                    var lryrics = currentCompleted.Result;
+                    var mfile = new FileInfo(listViewItem.SubItems[3].Text);
+                    File.WriteAllText($"{mfile.DirectoryName}/{Path.GetFileNameWithoutExtension(mfile.Name)}.lrc", lryrics);
                     listViewItem.SubItems[0].Text = "✔";
                 }
-                catch (AggregateException ex)
+                catch (AggregateException)
                 {
                     listViewItem.BackColor = System.Drawing.Color.Red;
                     listViewItem.ForeColor = System.Drawing.Color.White;

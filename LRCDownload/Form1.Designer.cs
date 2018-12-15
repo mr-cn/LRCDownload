@@ -101,7 +101,7 @@
             this.btnDown.TabIndex = 6;
             this.btnDown.Text = "Start download";
             this.btnDown.UseVisualStyleBackColor = true;
-            this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
+            this.btnDown.Click += new System.EventHandler(this.BtnDown_Click);
             // 
             // btnSelect
             // 
@@ -112,7 +112,7 @@
             this.btnSelect.TabIndex = 5;
             this.btnSelect.Text = "Select ..";
             this.btnSelect.UseVisualStyleBackColor = true;
-            this.btnSelect.Click += new System.EventHandler(this.btnSelect_Click);
+            this.btnSelect.Click += new System.EventHandler(this.BtnSelect_Click);
             // 
             // Form1
             // 
