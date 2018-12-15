@@ -34,7 +34,7 @@ namespace LRCDownload
                 try
                 {
                     var tfile = TagLib.File.Create(nextItem.FullName);
-                    var artist = tfile.Tag.AlbumArtists.Any() ? tfile.Tag.AlbumArtists[0] : tfile.Tag.Artists[0];
+                    var artist = TagHelper.GetArtist(tfile);
 
                     var item = new ListViewItem("");
                     item.SubItems.Add(tfile.Tag.Title);
@@ -53,9 +53,8 @@ namespace LRCDownload
             var tasks = new List<Tuple<Task<string>, ListViewItem>>();
             foreach (ListViewItem nextItem in listView1.Items)
             {
-                var title = nextItem.SubItems[1].Text;
-                var artist = nextItem.SubItems[2].Text;
-                tasks.Add(Tuple.Create(Plugins.Netease.GetLyricAsync(artist, title), nextItem));
+                var tfile = TagLib.File.Create(nextItem.SubItems[3].Text);
+                tasks.Add(Tuple.Create(Plugins.Netease.GetLyricAsync(tfile), nextItem));
             }
             while (tasks.Count > 0)
             {

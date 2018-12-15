@@ -4,45 +4,32 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using TagLib;
 
 namespace LRCDownload.Plugins
 {
-    internal class Netease
+    public class Kugou
     {
         public string Name()
         {
-            return "网易云音乐";
+            return "酷狗音乐";
         }
-
         public string Author()
         {
             return "built-in";
         }
-
         public string Version()
         {
             return "0.1";
         }
 
-        public static async Task<string> GetLyricAsync(File tfile)
+        public static async Task<string> GetLyricAsync(string artist, string title, int duration)
         {
-            var artist = TagHelper.GetArtist(tfile);
-            var title = TagHelper.GetTitle(tfile);
-            var album = TagHelper.GetAlbum(tfile);
-
             var client = new HttpClient();
             client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Add("Referer", "http://music.163.com/");
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
-            client.DefaultRequestHeaders.Add("Cookie", "appver=2.0.2");
 
-            var stringContent = new StringContent($"s={artist}+{title}+{album}&limit=15&type=1&offset=0");
-            stringContent.Headers.Clear();
-            stringContent.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-            var response = await client.PostAsync("http://music.163.com/api/search/get/", stringContent);
-
+            var response = await client.GetAsync("http://music.163.com/api/search/get/");
             response.EnsureSuccessStatusCode();
             var responseBodyAsText = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(responseBodyAsText);
@@ -59,10 +46,10 @@ namespace LRCDownload.Plugins
                 }
                 catch (NullReferenceException)
                 {
-                    // 若没有歌词，则查找下一个
+                    //若没有歌词，则查找下一个
                 }
 
-            throw new Exception(); // 找遍了都没有
+            throw new Exception();
         }
     }
 }
