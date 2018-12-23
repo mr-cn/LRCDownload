@@ -9,7 +9,7 @@ namespace LRCDownload
 {
     public partial class Form1 : Form
     {
-        private string[] _exts = { "*.flac", "*.m4a", "*.mp3", "*.wav" };
+        private readonly string[] _exts = { "*.flac", "*.m4a", "*.mp3", "*.wav" };
 
         public Form1()
         {
@@ -23,7 +23,7 @@ namespace LRCDownload
             var deviceDirectory = folderBrowserDialog1.SelectedPath;
             var folder = new DirectoryInfo(deviceDirectory);
             var sub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            listView1.Items.Clear();
+            listView.Items.Clear();
             var files = _exts.SelectMany(x => folder.EnumerateFiles(x,sub));
             foreach (var nextItem in files)
             {
@@ -36,7 +36,7 @@ namespace LRCDownload
                     item.SubItems.Add(tfile.Tag.Title);
                     item.SubItems.Add(artist);
                     item.SubItems.Add(nextItem.FullName);
-                    listView1.Items.Add(item);
+                    listView.Items.Add(item);
                 }
                 catch (IndexOutOfRangeException)
                 {  }
@@ -47,7 +47,7 @@ namespace LRCDownload
         {
             btnDown.Enabled = false;
             var tasks = new List<Tuple<Task<string>, ListViewItem>>();
-            foreach (ListViewItem nextItem in listView1.Items)
+            foreach (ListViewItem nextItem in listView.Items)
             {
                 var tfile = TagLib.File.Create(nextItem.SubItems[3].Text);
                 tasks.Add(Tuple.Create(Plugins.Kugou.GetLyricAsync(tfile), nextItem));

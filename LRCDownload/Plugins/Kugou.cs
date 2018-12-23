@@ -34,9 +34,7 @@ namespace LRCDownload.Plugins
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
-
-            Console.WriteLine($"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(artist)}-{Uri.EscapeDataString(title)}&duration={length}&hash=");
-
+            
             var response = await client.GetAsync($"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(artist)}-{Uri.EscapeDataString(title)}&duration={length}&hash=");
             response.EnsureSuccessStatusCode();
             var responseBodyAsText = await response.Content.ReadAsStringAsync();
