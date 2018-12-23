@@ -8,7 +8,7 @@ using TagLib;
 
 namespace LRCDownload.Plugins
 {
-    internal class Netease
+    public class Netease
     {
         public string Name()
         {

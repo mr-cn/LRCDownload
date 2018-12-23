@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using TagLib;
 
 namespace LRCDownload.Plugins
 {
@@ -22,27 +24,33 @@ namespace LRCDownload.Plugins
             return "0.1";
         }
 
-        public static async Task<string> GetLyricAsync(string artist, string title, int duration)
+        public static async Task<string> GetLyricAsync(File tfile)
         {
+            var artist = TagHelper.GetArtist(tfile);
+            var title = TagHelper.GetTitle(tfile);
+            var length = Math.Round(tfile.Properties.Duration.TotalMilliseconds);
+
             var client = new HttpClient();
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
 
-            var response = await client.GetAsync("http://music.163.com/api/search/get/");
+            Console.WriteLine($"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(artist)}-{Uri.EscapeDataString(title)}&duration={length}&hash=");
+
+            var response = await client.GetAsync($"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(artist)}-{Uri.EscapeDataString(title)}&duration={length}&hash=");
             response.EnsureSuccessStatusCode();
             var responseBodyAsText = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(responseBodyAsText);
-            IList<JToken> results = jObject["result"]["songs"].Children().ToList();
+            IList<JToken> results = jObject["candidates"].Children().ToList();
             foreach (var result in results)
                 try
                 {
                     response = await client.GetAsync(
-                        $"http://music.163.com/api/song/lyric?os=pc&id={result["id"]}&lv=-1&kv=-1&tv=-1");
+                        $"http://lyrics.kugou.com/download?ver=1&client=pc&id={result["id"]}&accesskey={result["accesskey"]}&fmt=lrc&charset=utf8");
                     response.EnsureSuccessStatusCode();
                     var lyricsAsText = await response.Content.ReadAsStringAsync();
                     var lyricsAsJson = JObject.Parse(lyricsAsText);
-                    return (string) lyricsAsJson["lrc"]["lyric"];
+                    return UnBase64String((string) lyricsAsJson["content"]);
                 }
                 catch (NullReferenceException)
                 {
@@ -50,6 +58,16 @@ namespace LRCDownload.Plugins
                 }
 
             throw new Exception();
+        }
+
+        public static string UnBase64String(string value)
+        {
+            if (value == null || value == "")
+            {
+                return "";
+            }
+            byte[] bytes = Convert.FromBase64String(value);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }

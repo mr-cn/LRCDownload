@@ -37,6 +37,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnDown = new System.Windows.Forms.Button();
             this.btnSelect = new System.Windows.Forms.Button();
+            this.checkBox_searchSubDir = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,7 +53,7 @@
             this.listView1.GridLines = true;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(851, 485);
+            this.listView1.Size = new System.Drawing.Size(887, 502);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -84,46 +85,58 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.checkBox_searchSubDir);
             this.panel1.Controls.Add(this.btnDown);
             this.panel1.Controls.Add(this.btnSelect);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(851, 0);
+            this.panel1.Location = new System.Drawing.Point(887, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(111, 485);
+            this.panel1.Size = new System.Drawing.Size(125, 502);
             this.panel1.TabIndex = 5;
             // 
             // btnDown
             // 
-            this.btnDown.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnDown.Location = new System.Drawing.Point(0, 60);
+            this.btnDown.Location = new System.Drawing.Point(6, 100);
             this.btnDown.Name = "btnDown";
             this.btnDown.Size = new System.Drawing.Size(111, 58);
             this.btnDown.TabIndex = 6;
-            this.btnDown.Text = "Start download";
+            this.btnDown.Text = "开始下载";
             this.btnDown.UseVisualStyleBackColor = true;
             this.btnDown.Click += new System.EventHandler(this.BtnDown_Click);
             // 
             // btnSelect
             // 
-            this.btnSelect.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnSelect.Location = new System.Drawing.Point(0, 0);
+            this.btnSelect.Location = new System.Drawing.Point(6, 12);
             this.btnSelect.Name = "btnSelect";
             this.btnSelect.Size = new System.Drawing.Size(111, 60);
             this.btnSelect.TabIndex = 5;
-            this.btnSelect.Text = "Select ..";
+            this.btnSelect.Text = "选择歌曲目录 ..";
             this.btnSelect.UseVisualStyleBackColor = true;
             this.btnSelect.Click += new System.EventHandler(this.BtnSelect_Click);
+            // 
+            // checkBox_searchSubDir
+            // 
+            this.checkBox_searchSubDir.AutoSize = true;
+            this.checkBox_searchSubDir.Checked = true;
+            this.checkBox_searchSubDir.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_searchSubDir.Location = new System.Drawing.Point(6, 78);
+            this.checkBox_searchSubDir.Name = "checkBox_searchSubDir";
+            this.checkBox_searchSubDir.Size = new System.Drawing.Size(84, 16);
+            this.checkBox_searchSubDir.TabIndex = 7;
+            this.checkBox_searchSubDir.Text = "查找子目录";
+            this.checkBox_searchSubDir.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(962, 485);
+            this.ClientSize = new System.Drawing.Size(1012, 502);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.Text = "LRCDownload";
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -138,6 +151,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnDown;
         private System.Windows.Forms.Button btnSelect;
+        private System.Windows.Forms.CheckBox checkBox_searchSubDir;
     }
 }
 

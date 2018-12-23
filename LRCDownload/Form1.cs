@@ -9,7 +9,7 @@ namespace LRCDownload
 {
     public partial class Form1 : Form
     {
-        private string _deviceDirectory;
+        private string[] _exts = { "*.flac", "*.m4a", "*.mp3", "*.wav" };
 
         public Form1()
         {
@@ -20,15 +20,11 @@ namespace LRCDownload
         {
             if (folderBrowserDialog1.ShowDialog() != DialogResult.OK)
                 return;
-            _deviceDirectory = folderBrowserDialog1.SelectedPath;
+            var deviceDirectory = folderBrowserDialog1.SelectedPath;
+            var folder = new DirectoryInfo(deviceDirectory);
+            var sub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             listView1.Items.Clear();
-            var theFolder = new DirectoryInfo(_deviceDirectory);
-            var files = theFolder.GetFiles("*", SearchOption.AllDirectories)
-                .Where(file => file.Name.ToLower().EndsWith(".flac"))
-                .Where(file => file.Name.ToLower().EndsWith(".m4a"))
-                .Where(file => file.Name.ToLower().EndsWith(".wav"))
-                .Where(file => file.Name.ToLower().EndsWith(".mp3"))
-                .ToList();
+            var files = _exts.SelectMany(x => folder.EnumerateFiles(x,sub));
             foreach (var nextItem in files)
             {
                 try
@@ -54,7 +50,7 @@ namespace LRCDownload
             foreach (ListViewItem nextItem in listView1.Items)
             {
                 var tfile = TagLib.File.Create(nextItem.SubItems[3].Text);
-                tasks.Add(Tuple.Create(Plugins.Netease.GetLyricAsync(tfile), nextItem));
+                tasks.Add(Tuple.Create(Plugins.Kugou.GetLyricAsync(tfile), nextItem));
             }
             while (tasks.Count > 0)
             {
