@@ -35,9 +35,10 @@
             this.columnFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.checkBox_searchSubDir = new System.Windows.Forms.CheckBox();
             this.btnDown = new System.Windows.Forms.Button();
             this.btnSelect = new System.Windows.Forms.Button();
-            this.checkBox_searchSubDir = new System.Windows.Forms.CheckBox();
+            this.checkBox_replaceAlbumArtist = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,6 +86,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.checkBox_replaceAlbumArtist);
             this.panel1.Controls.Add(this.checkBox_searchSubDir);
             this.panel1.Controls.Add(this.btnDown);
             this.panel1.Controls.Add(this.btnSelect);
@@ -94,9 +96,21 @@
             this.panel1.Size = new System.Drawing.Size(125, 502);
             this.panel1.TabIndex = 5;
             // 
+            // checkBox_searchSubDir
+            // 
+            this.checkBox_searchSubDir.AutoSize = true;
+            this.checkBox_searchSubDir.Checked = true;
+            this.checkBox_searchSubDir.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_searchSubDir.Location = new System.Drawing.Point(6, 78);
+            this.checkBox_searchSubDir.Name = "checkBox_searchSubDir";
+            this.checkBox_searchSubDir.Size = new System.Drawing.Size(84, 16);
+            this.checkBox_searchSubDir.TabIndex = 7;
+            this.checkBox_searchSubDir.Text = "查找子目录";
+            this.checkBox_searchSubDir.UseVisualStyleBackColor = true;
+            // 
             // btnDown
             // 
-            this.btnDown.Location = new System.Drawing.Point(6, 100);
+            this.btnDown.Location = new System.Drawing.Point(6, 134);
             this.btnDown.Name = "btnDown";
             this.btnDown.Size = new System.Drawing.Size(111, 58);
             this.btnDown.TabIndex = 6;
@@ -114,17 +128,15 @@
             this.btnSelect.UseVisualStyleBackColor = true;
             this.btnSelect.Click += new System.EventHandler(this.BtnSelect_Click);
             // 
-            // checkBox_searchSubDir
+            // checkBox_replaceAlbumArtist
             // 
-            this.checkBox_searchSubDir.AutoSize = true;
-            this.checkBox_searchSubDir.Checked = true;
-            this.checkBox_searchSubDir.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_searchSubDir.Location = new System.Drawing.Point(6, 78);
-            this.checkBox_searchSubDir.Name = "checkBox_searchSubDir";
-            this.checkBox_searchSubDir.Size = new System.Drawing.Size(84, 16);
-            this.checkBox_searchSubDir.TabIndex = 7;
-            this.checkBox_searchSubDir.Text = "查找子目录";
-            this.checkBox_searchSubDir.UseVisualStyleBackColor = true;
+            this.checkBox_replaceAlbumArtist.AutoSize = true;
+            this.checkBox_replaceAlbumArtist.Location = new System.Drawing.Point(6, 100);
+            this.checkBox_replaceAlbumArtist.Name = "checkBox_replaceAlbumArtist";
+            this.checkBox_replaceAlbumArtist.Size = new System.Drawing.Size(114, 28);
+            this.checkBox_replaceAlbumArtist.TabIndex = 8;
+            this.checkBox_replaceAlbumArtist.Text = "附加:使用专辑演\r\n唱者替换演唱者";
+            this.checkBox_replaceAlbumArtist.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -152,6 +164,7 @@
         private System.Windows.Forms.Button btnDown;
         private System.Windows.Forms.Button btnSelect;
         private System.Windows.Forms.CheckBox checkBox_searchSubDir;
+        private System.Windows.Forms.CheckBox checkBox_replaceAlbumArtist;
     }
 }
 

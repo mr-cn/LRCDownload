@@ -55,8 +55,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Plugins\Kugou.cs" />
-    <Compile Include="Plugins\Netease.cs" />
+    <Compile Include="Clients\IClient.cs" />
+    <Compile Include="Clients\Kugou.cs" />
+    <Compile Include="Clients\Netease.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TagHelper.cs" />

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using LRCDownload.Clients;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -9,6 +11,9 @@ namespace LRCDownload
 {
     public partial class Form1 : Form
     {
+        /// <summary>
+        /// Extensions which represents a music file
+        /// </summary>
         private readonly string[] _exts = { "*.flac", "*.m4a", "*.mp3", "*.wav" };
 
         public Form1()
@@ -19,58 +24,75 @@ namespace LRCDownload
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() != DialogResult.OK)
+            {
                 return;
+            }
+
             var deviceDirectory = folderBrowserDialog1.SelectedPath;
             var folder = new DirectoryInfo(deviceDirectory);
-            var sub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var checkSub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             listView.Items.Clear();
-            var files = _exts.SelectMany(x => folder.EnumerateFiles(x,sub));
-            foreach (var nextItem in files)
+            foreach (var nextItem in _exts.SelectMany(x => folder.EnumerateFiles(x, checkSub)))
             {
-                try
-                {
-                    var tfile = TagLib.File.Create(nextItem.FullName);
-                    var artist = TagHelper.GetArtist(tfile);
-
-                    var item = new ListViewItem("");
-                    item.SubItems.Add(tfile.Tag.Title);
-                    item.SubItems.Add(artist);
-                    item.SubItems.Add(nextItem.FullName);
-                    listView.Items.Add(item);
-                }
-                catch (IndexOutOfRangeException)
-                {  }
+                var tagFile = TagLib.File.Create(nextItem.FullName);
+                var artist = TagHelper.GetArtist(tagFile);
+                var item = new ListViewItem("");
+                item.SubItems.Add(tagFile.Tag.Title);
+                item.SubItems.Add(artist);
+                item.SubItems.Add(nextItem.FullName);
+                listView.Items.Add(item);
             }
+        }
+
+        struct TaskStruct
+        {
+            public ListViewItem view;
+            public Task<string> task;
+
+            public TaskStruct(ListViewItem item, Task<string> task)
+            {
+                view = item;
+                this.task = task;
+            }
+        }
+
+        private async Task awaitAndHandleLyric(TaskStruct taskStruct)
+        {
+            try
+            {
+                var result = await taskStruct.task;
+                var lrcFile = new FileInfo(taskStruct.view.SubItems[3].Text);
+                File.WriteAllText($"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc", result);
+                taskStruct.view.SubItems[0].Text = "✔";
+            }
+            catch (AggregateException)
+            {
+                // It means the searching task failed
+                taskStruct.view.SubItems[0].Text = "✖";
+                throw;
+            }
+            catch (IOException)
+            {
+                // It means the lrc cannot be written
+                taskStruct.view.SubItems[0].Text = "✖";
+                throw;
+            }
+
         }
 
         private async void BtnDown_Click(object sender, EventArgs e)
         {
             btnDown.Enabled = false;
-            var tasks = new List<Tuple<Task<string>, ListViewItem>>();
+            var tasks = new List<TaskStruct>();
             foreach (ListViewItem nextItem in listView.Items)
             {
-                var tfile = TagLib.File.Create(nextItem.SubItems[3].Text);
-                tasks.Add(Tuple.Create(Plugins.Kugou.GetLyricAsync(tfile), nextItem));
+                var tagFile = TagLib.File.Create(nextItem.SubItems[3].Text);
+                var client = new Netease(tagFile);
+                tasks.Add(new TaskStruct(nextItem, client.GetLyricAsync()));
+                Thread.Sleep(50); // Add 20 tasks one second
             }
-            while (tasks.Count > 0)
-            {
-                var currentCompleted = await Task.WhenAny(tasks.Select(x => x.Item1).ToList());
-                var task = tasks.First(x => x.Item1.Equals(currentCompleted));
-                var listViewItem = task.Item2;
-                try
-                {
-                    var lryrics = currentCompleted.Result;
-                    var mfile = new FileInfo(listViewItem.SubItems[3].Text);
-                    File.WriteAllText($"{mfile.DirectoryName}/{Path.GetFileNameWithoutExtension(mfile.Name)}.lrc", lryrics);
-                    listViewItem.SubItems[0].Text = "✔";
-                }
-                catch (AggregateException)
-                {
-                    listViewItem.BackColor = System.Drawing.Color.Red;
-                    listViewItem.ForeColor = System.Drawing.Color.White;
-                }
-                tasks.Remove(task);
-            }
+            var processingTasks = tasks.Select(awaitAndHandleLyric).ToArray();
+            await Task.WhenAll(processingTasks);
             btnDown.Enabled = true;
             MessageBox.Show("The process has been done.", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         }

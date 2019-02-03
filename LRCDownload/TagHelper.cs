@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace LRCDownload
 {
-    public class TagHelper
+    public static class TagHelper
     {
         public static string GetArtist(TagLib.File tfile)
         {
