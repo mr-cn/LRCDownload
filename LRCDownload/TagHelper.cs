@@ -1,22 +1,24 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
+using TagLib;
 
 namespace LRCDownload
 {
     public static class TagHelper
     {
-        public static string GetArtist(TagLib.File tfile)
+        public static string GetArtist(File tfile)
         {
-            var artist = tfile.Tag.AlbumArtists.Any() ? tfile.Tag.AlbumArtists[0] : tfile.Tag.Artists[0];
-            return process_keywords(artist);
+            if (tfile.Tag.AlbumArtists.Any())
+                return process_keywords(tfile.Tag.AlbumArtists[0]);
+            return tfile.Tag.Artists.Any() ? process_keywords(tfile.Tag.Artists[0]) : null;
         }
 
-        public static string GetAlbum(TagLib.File tfile)
+        public static string GetAlbum(File tfile)
         {
-            return process_keywords(tfile.Tag.Album);
+            return string.IsNullOrWhiteSpace(tfile.Tag.Album) ? null : process_keywords(tfile.Tag.Album);
         }
 
-        public static string GetTitle(TagLib.File tfile)
+        public static string GetTitle(File tfile)
         {
             return process_keywords(tfile.Tag.Title);
         }

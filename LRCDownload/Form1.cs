@@ -34,6 +34,8 @@ namespace LRCDownload
             foreach (var nextItem in _exts.SelectMany(x => folder.EnumerateFiles(x, checkSub)))
             {
                 var tagFile = File.Create(nextItem.FullName);
+                if (string.IsNullOrWhiteSpace(tagFile.Tag.Title)) // jump musics without metadata
+                    continue;
                 var artist = TagHelper.GetArtist(tagFile);
                 var item = new ListViewItem("");
                 item.SubItems.Add(tagFile.Tag.Title);
