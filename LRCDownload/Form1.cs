@@ -46,32 +46,41 @@ namespace LRCDownload
 
         struct TaskStruct
         {
-            public ListViewItem view;
-            public Task<string> task;
+            public ListViewItem ViewItem;
+            public IClient Client;
 
-            public TaskStruct(ListViewItem item, Task<string> task)
+            public TaskStruct(ListViewItem item, IClient client)
             {
-                view = item;
-                this.task = task;
+                this.ViewItem = item;
+                this.Client = client;
             }
         }
 
         async Task ProcessTasksAsync(List<TaskStruct> tasks)
         {
-            var processingTasks = tasks.Select(async s =>
-            {
-                var result = await s.task;
+            // 使用 SemaphoreSlim 限流，防止访问过快被 Ban
+            var throttler = new SemaphoreSlim(initialCount: 5);
 
-                var lrcFile = new FileInfo(s.view.SubItems[3].Text);
-                File.WriteAllText($"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc", result);
-                s.view.SubItems[0].Text = "✔";
-               
+            var processingTasks = tasks.Select(async i =>
+            {
+                try
+                {
+                    var result = await i.Client.GetLyricAsync();
+                    var lrcFile = new FileInfo(i.ViewItem.SubItems[3].Text);
+                    File.WriteAllText($"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc",
+                        result);
+                    i.ViewItem.SubItems[0].Text = "✔";
+                }
+                finally
+                {
+                    throttler.Release();
+                }
             }).ToArray();
 
             // 等待全部处理过程的完成。
             await Task.WhenAll(processingTasks);
             btnDown.Enabled = true;
-            MessageBox.Show("The process has been done.", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            MessageBox.Show("下载完毕", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         }
 
         private void BtnDown_Click(object sender, EventArgs e)
@@ -81,8 +90,8 @@ namespace LRCDownload
             foreach (ListViewItem nextItem in listView.Items)
             {
                 var tagFile = TagLib.File.Create(nextItem.SubItems[3].Text);
-                var client = new Netease(tagFile);
-                tasks.Add(new TaskStruct(nextItem, client.GetLyricAsync()));
+                IClient client = new Netease(tagFile);
+                tasks.Add(new TaskStruct(nextItem, client));
             }
             ProcessTasksAsync(tasks);
         }

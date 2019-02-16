@@ -1,25 +1,22 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using TagLib;
 
 namespace LRCDownload.Clients
 {
-    class Netease : IClient
+    internal class Netease : IClient
     {
         public Netease(File metadata)
         {
             Metadata = metadata;
         }
 
-        public File Metadata { get; }
-
         private string Artist => TagHelper.GetArtist(Metadata);
         private string Title => TagHelper.GetTitle(Metadata);
         private string Album => TagHelper.GetAlbum(Metadata);
+
+        public File Metadata { get; }
 
         public string Name()
         {
@@ -44,23 +41,23 @@ namespace LRCDownload.Clients
             var responseText = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(responseText);
 
-            Trace.WriteLine($"[Netease][{Title}] Find {jObject["result"]["songs"].Count()} results.");
+            if (!jObject.ContainsKey("result")) // Whether the music is blocked or uncollected, we shouldn't go on.
+                return null;
 
             foreach (var result in jObject["result"]["songs"].Children())
-                try
-                {
-                    response = await client.GetAsync(
-                        $"http://music.163.com/api/song/lyric?os=pc&id={result["id"]}&lv=-1&kv=-1&tv=-1");
-                    response.EnsureSuccessStatusCode();
-                    var resultText = await response.Content.ReadAsStringAsync();
-                    var lyrics = JObject.Parse(resultText)["lrc"]["lyric"];
-                    Trace.WriteLine($"[Netease][{Title}] Used lyric ID {result["id"]}.");
-                    return (string) lyrics;
-                }
-                catch (NullReferenceException)
-                {
-                    // Use next candidate if failed
-                }
+            {
+                response = await client.GetAsync(
+                    $"http://music.163.com/api/song/lyric?os=pc&id={result["id"]}&lv=-1&kv=-1&tv=-1");
+                response.EnsureSuccessStatusCode();
+                var resultText = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(resultText);
+
+                if (json.ContainsKey("nolyric")) // Means the music doesn't have lyric. (Normally pure music)
+                    return "纯音乐";
+                if (json.ContainsKey("uncollected")) // Means there's no lyric in the database.
+                    continue;
+                return (string) json["lrc"]["lyric"];
+            }
 
             return null;
         }

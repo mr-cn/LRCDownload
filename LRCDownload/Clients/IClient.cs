@@ -14,7 +14,10 @@ namespace LRCDownload.Clients
         /// <summary>
         ///     Gets the lyrics
         /// </summary>
-        /// <returns>lyrics (task)</returns>
+        /// <returns>
+        /// lyrics (task)
+        /// if it is null, it means it failed.
+        /// </returns>
         Task<string> GetLyricAsync();
 
         /// <summary>
