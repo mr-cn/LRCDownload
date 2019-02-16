@@ -56,31 +56,25 @@ namespace LRCDownload
             }
         }
 
-        private async Task awaitAndHandleLyric(TaskStruct taskStruct)
+        async Task ProcessTasksAsync(List<TaskStruct> tasks)
         {
-            try
+            var processingTasks = tasks.Select(async s =>
             {
-                var result = await taskStruct.task;
-                var lrcFile = new FileInfo(taskStruct.view.SubItems[3].Text);
-                File.WriteAllText($"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc", result);
-                taskStruct.view.SubItems[0].Text = "✔";
-            }
-            catch (AggregateException)
-            {
-                // It means the searching task failed
-                taskStruct.view.SubItems[0].Text = "✖";
-                throw;
-            }
-            catch (IOException)
-            {
-                // It means the lrc cannot be written
-                taskStruct.view.SubItems[0].Text = "✖";
-                throw;
-            }
+                var result = await s.task;
 
+                var lrcFile = new FileInfo(s.view.SubItems[3].Text);
+                File.WriteAllText($"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc", result);
+                s.view.SubItems[0].Text = "✔";
+               
+            }).ToArray();
+
+            // 等待全部处理过程的完成。
+            await Task.WhenAll(processingTasks);
+            btnDown.Enabled = true;
+            MessageBox.Show("The process has been done.", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         }
 
-        private async void BtnDown_Click(object sender, EventArgs e)
+        private void BtnDown_Click(object sender, EventArgs e)
         {
             btnDown.Enabled = false;
             var tasks = new List<TaskStruct>();
@@ -89,12 +83,8 @@ namespace LRCDownload
                 var tagFile = TagLib.File.Create(nextItem.SubItems[3].Text);
                 var client = new Netease(tagFile);
                 tasks.Add(new TaskStruct(nextItem, client.GetLyricAsync()));
-                Thread.Sleep(50); // Add 20 tasks one second
             }
-            var processingTasks = tasks.Select(awaitAndHandleLyric).ToArray();
-            await Task.WhenAll(processingTasks);
-            btnDown.Enabled = true;
-            MessageBox.Show("The process has been done.", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            ProcessTasksAsync(tasks);
         }
     }
 }
