@@ -11,7 +11,7 @@ using File = TagLib.File;
 
 namespace LRCDownload
 {
-    public partial class MainForm: Form
+    public partial class MainForm : Form
     {
         /// <summary>
         ///     将被识别的音乐文件的后缀名
@@ -59,10 +59,7 @@ namespace LRCDownload
                     var result = await i.Client.GetLyricAsync();
                     if (!string.IsNullOrWhiteSpace(result))
                     {
-                        var lrcFile = new FileInfo(i.ViewItem.SubItems[3].Text);
-                        System.IO.File.WriteAllText(
-                            $"{lrcFile.DirectoryName}/{Path.GetFileNameWithoutExtension(lrcFile.Name)}.lrc",
-                            result);
+                        System.IO.File.WriteAllText(Path.ChangeExtension(i.ViewItem.SubItems[3].Text, ".lrc"), result);
                         i.ViewItem.SubItems[0].Text = "✔";
                     }
                     else

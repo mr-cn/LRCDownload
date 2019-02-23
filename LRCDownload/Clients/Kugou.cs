@@ -7,18 +7,18 @@ using TagLib;
 
 namespace LRCDownload.Clients
 {
-    class Kugou : IClient
+    internal class Kugou : IClient
     {
         public Kugou(File metadata)
         {
             Metadata = metadata;
         }
 
-        public File Metadata { get; }
-
         private string Artist => TagHelper.GetArtist(Metadata);
         private string Title => TagHelper.GetTitle(Metadata);
         private double Length => Metadata.Properties.Duration.TotalMilliseconds;
+
+        public File Metadata { get; }
 
         public string Name()
         {

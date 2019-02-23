@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text.RegularExpressions;
 using TagLib;
 
 namespace LRCDownload
@@ -25,12 +24,12 @@ namespace LRCDownload
 
         private static string process_keywords(string s)
         {
-            s = Regex.Replace(s, @"/\'|·|\$|\&|–/g", string.Empty);
-            //s = Regex.Replace(s, @"/\(.*?\)|\[.*?]|{.*?}|（.*?/g", string.Empty);
-            s = Regex.Replace(s, @"/[-/:-@[-`{-~]+/g", string.Empty);
-            s = Regex.Replace(s,
-                @"/[\u2014\u2018\u201c\u2026\u3001\u3002\u300a\u300b\u300e\u300f\u3010\u3011\u30fb\uff01\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff5e\uffe5]+/g",
-                string.Empty);
+            //s = Regex.Replace(s, @"/\'|·|\$|\&|–/g", string.Empty);
+            ////s = Regex.Replace(s, @"/\(.*?\)|\[.*?]|{.*?}|（.*?/g", string.Empty);
+            //s = Regex.Replace(s, @"/[-/:-@[-`{-~]+/g", string.Empty);
+            //s = Regex.Replace(s,
+            //    @"/[\u2014\u2018\u201c\u2026\u3001\u3002\u300a\u300b\u300e\u300f\u3010\u3011\u30fb\uff01\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff5e\uffe5]+/g",
+            //    string.Empty);
             return s;
         }
     }

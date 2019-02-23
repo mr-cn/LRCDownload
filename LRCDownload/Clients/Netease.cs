@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using TagLib;
@@ -32,10 +33,14 @@ namespace LRCDownload.Clients
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
             client.DefaultRequestHeaders.Add("Cookie", "appver=2.0.2");
 
-            var stringContent = new StringContent($"s={Artist}+{Title}+{Album}&limit=15&type=1&offset=0");
-            stringContent.Headers.Clear();
-            stringContent.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-            var response = await client.PostAsync("http://music.163.com/api/search/get/", stringContent);
+            var keyValues = new List<KeyValuePair<string, string>>(); // POST Send Params
+            keyValues.Add(new KeyValuePair<string, string>("s", $"{Title} - {Album} - {Artist}")); // set keywords
+            keyValues.Add(new KeyValuePair<string, string>("limit", "15")); // receive 15 results
+            keyValues.Add(new KeyValuePair<string, string>("type", "1"));
+            keyValues.Add(new KeyValuePair<string, string>("offset", "0"));
+            var postContent = new FormUrlEncodedContent(keyValues);
+
+            var response = await client.PostAsync("http://music.163.com/api/search/get/", postContent);
 
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
