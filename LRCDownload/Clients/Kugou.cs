@@ -34,7 +34,7 @@ namespace LRCDownload.Clients
 
             var response =
                 await client.GetAsync(
-                    $"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(Artist)}-{Uri.EscapeDataString(Title)}&duration={Length}&hash=");
+                    $"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(Title)}-{Uri.EscapeDataString(Artist)}&duration={Length}&hash=");
 
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
