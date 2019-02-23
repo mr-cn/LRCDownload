@@ -43,6 +43,8 @@ namespace LRCDownload.Clients
 
             if (!jObject.ContainsKey("result")) // Whether the music is blocked or uncollected, we shouldn't go on.
                 return null;
+            if ((int) jObject["result"]["songCount"] == 0) // There's no result.
+                return null;
 
             foreach (var result in jObject["result"]["songs"].Children())
             {
@@ -52,9 +54,9 @@ namespace LRCDownload.Clients
                 var resultText = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(resultText);
 
-                if (json.ContainsKey("nolyric")) // Means the music doesn't have lyric. (Normally pure music)
+                if (json.ContainsKey("nolyric")) // The music itself doesn't have lyric. (Normally pure music)
                     return "纯音乐";
-                if (json.ContainsKey("uncollected")) // Means there's no lyric in the database.
+                if (json.ContainsKey("uncollected")) // There's no lyric so far.
                     continue;
                 return (string) json["lrc"]["lyric"];
             }

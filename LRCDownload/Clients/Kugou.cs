@@ -51,7 +51,7 @@ namespace LRCDownload.Clients
                 }
                 catch (NullReferenceException)
                 {
-                    // Use next candidate if failed
+                    // 使用下一个候选歌曲
                 }
 
             return null;
