@@ -11,14 +11,14 @@ using File = TagLib.File;
 
 namespace LRCDownload
 {
-    public partial class Form1 : Form
+    public partial class MainForm: Form
     {
         /// <summary>
-        ///     Extensions which represents a music file
+        ///     将被识别的音乐文件的后缀名
         /// </summary>
         private readonly string[] _exts = {"*.flac", "*.m4a", "*.mp3", "*.wav"};
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -34,7 +34,9 @@ namespace LRCDownload
             foreach (var nextItem in _exts.SelectMany(x => folder.EnumerateFiles(x, checkSub)))
             {
                 var tagFile = File.Create(nextItem.FullName);
-                if (string.IsNullOrWhiteSpace(tagFile.Tag.Title)) // jump musics without metadata
+                if (string.IsNullOrWhiteSpace(tagFile.Tag.Title)) // 跳过没有元数据的歌曲
+                    continue;
+                if (new FileInfo(Path.ChangeExtension(nextItem.FullName, ".lrc")).Exists) // 跳过已经有歌词的歌曲
                     continue;
                 var artist = TagHelper.GetArtist(tagFile);
                 var item = new ListViewItem("");

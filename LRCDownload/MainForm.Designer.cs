@@ -1,6 +1,6 @@
 ﻿namespace LRCDownload
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -138,14 +138,14 @@
             this.checkBox_replaceAlbumArtist.Text = "附加:使用专辑演\r\n唱者替换演唱者";
             this.checkBox_replaceAlbumArtist.UseVisualStyleBackColor = true;
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1012, 502);
             this.Controls.Add(this.listView);
             this.Controls.Add(this.panel1);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "LRCDownload";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
