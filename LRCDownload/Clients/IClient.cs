@@ -3,7 +3,7 @@ using TagLib;
 
 namespace LRCDownload.Clients
 {
-    internal interface IClient
+    public interface IClient
     {
         /// <summary>
         ///     Returns the client name
@@ -18,11 +18,6 @@ namespace LRCDownload.Clients
         /// lyrics (task)
         /// if it is null, it means it failed.
         /// </returns>
-        Task<string> GetLyricAsync();
-
-        /// <summary>
-        /// Stores the metadata
-        /// </summary>
-        File Metadata { get; }
+        Task<string> GetLyricAsync(File metadata);
     }
 }

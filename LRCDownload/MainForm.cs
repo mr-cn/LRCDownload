@@ -18,9 +18,21 @@ namespace LRCDownload
         /// </summary>
         private readonly string[] _exts = {"*.flac", "*.m4a", "*.mp3", "*.wav"};
 
+        /// <summary>
+        /// 储存将被处理的音乐
+        /// </summary>
+        List<Music> Musics = new List<Music>();
+
         public MainForm()
         {
             InitializeComponent();
+            foreach (var client in ClientsManager.Clients)
+            {
+                comboBox1.Items.Add(client.Key);
+                LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 加载插件: {client.Value.Name()}");
+            }
+
+            comboBox1.SelectedIndex = 0;
         }
 
         private void BtnSelect_Click(object sender, EventArgs e)
@@ -30,24 +42,25 @@ namespace LRCDownload
             var deviceDirectory = folderBrowserDialog1.SelectedPath;
             var folder = new DirectoryInfo(deviceDirectory);
             var checkSub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            listView.Items.Clear();
             foreach (var nextItem in _exts.SelectMany(x => folder.EnumerateFiles(x, checkSub)))
             {
-                var tagFile = File.Create(nextItem.FullName);
-                if (string.IsNullOrWhiteSpace(tagFile.Tag.Title)) // 跳过没有元数据的歌曲
+                var music = Music.CreateFromFile(nextItem);
+                if (!music.HasProperTag()) // 跳过没有元数据的歌曲
+                {
+                    LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 添加时跳过:\"{nextItem.Name}\" 原因是：没有正确的元数据");
                     continue;
-                if (new FileInfo(Path.ChangeExtension(nextItem.FullName, ".lrc")).Exists) // 跳过已经有歌词的歌曲
+                }
+                if (music.ExistLyrics()) // 跳过已经有歌词的歌曲
+                {
+                    LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 添加时跳过:\"{nextItem.Name}\" 原因是：已经有对应的歌词文件存在");
                     continue;
-                var artist = TagHelper.GetArtist(tagFile);
-                var item = new ListViewItem("");
-                item.SubItems.Add(tagFile.Tag.Title);
-                item.SubItems.Add(artist);
-                item.SubItems.Add(nextItem.FullName);
-                listView.Items.Add(item);
+                }
+                Musics.Add(music);
             }
+            LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 已成功添加: {Musics.Count} 项");
         }
 
-        private async Task ProcessTasksAsync(List<TaskStruct> tasks)
+        private async Task ProcessTasksAsync(List<Music> tasks)
         {
             // 使用 SemaphoreSlim 限流，防止访问过快被 Ban
             var throttler = new SemaphoreSlim(5);
@@ -56,17 +69,15 @@ namespace LRCDownload
             {
                 try
                 {
-                    var result = await i.Client.GetLyricAsync();
+                    var client = ClientsManager.Clients[comboBox1.SelectedItem.ToString()];
+                    var result = await client.GetLyricAsync(i.GetMetadata()).ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(result))
                     {
-                        System.IO.File.WriteAllText(Path.ChangeExtension(i.ViewItem.SubItems[3].Text, ".lrc"), result);
-                        i.ViewItem.SubItems[0].Text = "✔";
+                        System.IO.File.WriteAllText(Path.ChangeExtension(i.GetPath(), ".lrc"), result);
                     }
                     else
                     {
-                        i.ViewItem.SubItems[0].Text = "✖";
-                        i.ViewItem.BackColor = Color.Red;
-                        i.ViewItem.ForeColor = Color.White;
+                        LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 歌词获取失败: 歌曲{i.GetMetadata().Tag.Title}");
                     }
                 }
                 finally
@@ -84,27 +95,7 @@ namespace LRCDownload
         private void BtnDown_Click(object sender, EventArgs e)
         {
             btnDown.Enabled = false;
-            var tasks = new List<TaskStruct>();
-            foreach (ListViewItem nextItem in listView.Items)
-            {
-                var tagFile = File.Create(nextItem.SubItems[3].Text);
-                IClient client = new Netease(tagFile);
-                tasks.Add(new TaskStruct(nextItem, client));
-            }
-
-            ProcessTasksAsync(tasks);
-        }
-
-        private struct TaskStruct
-        {
-            public readonly ListViewItem ViewItem;
-            public readonly IClient Client;
-
-            public TaskStruct(ListViewItem item, IClient client)
-            {
-                ViewItem = item;
-                Client = client;
-            }
+            ProcessTasksAsync(Musics);
         }
     }
 }

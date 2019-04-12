@@ -9,32 +9,25 @@ namespace LRCDownload.Clients
 {
     internal class Kugou : IClient
     {
-        public Kugou(File metadata)
-        {
-            Metadata = metadata;
-        }
-
-        private string Artist => TagHelper.GetArtist(Metadata);
-        private string Title => TagHelper.GetTitle(Metadata);
-        private double Length => Metadata.Properties.Duration.TotalMilliseconds;
-
-        public File Metadata { get; }
-
         public string Name()
         {
             return "酷狗音乐";
         }
 
-        public async Task<string> GetLyricAsync()
+        public async Task<string> GetLyricAsync(File metadata)
         {
+            string artist = TagHelper.GetArtist(metadata);
+            string title = TagHelper.GetTitle(metadata);
+            string album = TagHelper.GetAlbum(metadata);
+            double length = metadata.Properties.Duration.TotalMilliseconds;
+
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
 
             var response =
                 await client.GetAsync(
-                    $"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(Title)}-{Uri.EscapeDataString(Artist)}&duration={Length}&hash=");
+                    $"http://lyrics.kugou.com/search?ver=1&man=yes&client=pc&keyword={Uri.EscapeDataString(title)}-{Uri.EscapeDataString(artist)}&duration={length}&hash=");
 
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();

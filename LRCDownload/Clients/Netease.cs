@@ -8,36 +8,30 @@ namespace LRCDownload.Clients
 {
     internal class Netease : IClient
     {
-        public Netease(File metadata)
-        {
-            Metadata = metadata;
-        }
-
-        private string Artist => TagHelper.GetArtist(Metadata);
-        private string Title => TagHelper.GetTitle(Metadata);
-        private string Album => TagHelper.GetAlbum(Metadata);
-
-        public File Metadata { get; }
-
         public string Name()
         {
             return "网易云音乐";
         }
 
-        public async Task<string> GetLyricAsync()
+        public async Task<string> GetLyricAsync(File metadata)
         {
+            string artist = TagHelper.GetArtist(metadata);
+            string title = TagHelper.GetTitle(metadata);
+            string album = TagHelper.GetAlbum(metadata);
+
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("Referer", "http://music.163.com/");
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
             client.DefaultRequestHeaders.Add("Cookie", "appver=2.0.2");
 
-            var keyValues = new List<KeyValuePair<string, string>>(); // POST Send Params
-            keyValues.Add(new KeyValuePair<string, string>("s", $"{Title} - {Album} - {Artist}")); // set keywords
-            keyValues.Add(new KeyValuePair<string, string>("limit", "15")); // receive 15 results
-            keyValues.Add(new KeyValuePair<string, string>("type", "1"));
-            keyValues.Add(new KeyValuePair<string, string>("offset", "0"));
+            var keyValues = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("s", $"{title} - {album} - {artist}"), // set keywords
+                new KeyValuePair<string, string>("limit", "15"), // receive 15 results
+                new KeyValuePair<string, string>("type", "1"),
+                new KeyValuePair<string, string>("offset", "0")
+            };
             var postContent = new FormUrlEncodedContent(keyValues);
 
             var response = await client.PostAsync("http://music.163.com/api/search/get/", postContent);
