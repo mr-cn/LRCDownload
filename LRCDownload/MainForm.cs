@@ -40,6 +40,7 @@ namespace LRCDownload
             if (folderBrowserDialog1.ShowDialog() != DialogResult.OK) return;
 
             var deviceDirectory = folderBrowserDialog1.SelectedPath;
+            LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 开始扫描目录 {deviceDirectory} 下的歌曲。");
             var folder = new DirectoryInfo(deviceDirectory);
             var checkSub = checkBox_searchSubDir.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             foreach (var nextItem in _exts.SelectMany(x => folder.EnumerateFiles(x, checkSub)))
@@ -98,6 +99,7 @@ namespace LRCDownload
 
         private void BtnDown_Click(object sender, EventArgs e)
         {
+            LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 开始下载歌词。");
             btnDown.Enabled = false;
             ProcessTasksAsync(Musics);
         }
