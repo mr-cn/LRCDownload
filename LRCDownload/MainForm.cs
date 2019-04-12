@@ -52,7 +52,7 @@ namespace LRCDownload
                 }
                 if (music.ExistLyrics()) // 跳过已经有歌词的歌曲
                 {
-                    LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 添加时跳过:\"{nextItem.Name}\" 原因是：已经有对应的歌词文件存在");
+                    // LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] 添加时跳过:\"{nextItem.Name}\" 原因是：已经有对应的歌词文件存在");
                     continue;
                 }
                 Musics.Add(music);
@@ -62,6 +62,8 @@ namespace LRCDownload
 
         private async Task ProcessTasksAsync(List<Music> tasks)
         {
+            // 成功计数器
+            var successCount = 0;
             // 使用 SemaphoreSlim 限流，防止访问过快被 Ban
             var throttler = new SemaphoreSlim(5);
 
@@ -74,6 +76,8 @@ namespace LRCDownload
                     if (!string.IsNullOrWhiteSpace(result))
                     {
                         System.IO.File.WriteAllText(Path.ChangeExtension(i.GetPath(), ".lrc"), result);
+                        successCount++;
+                        Musics.Remove(i);
                     }
                     else
                     {
@@ -89,7 +93,7 @@ namespace LRCDownload
             // 等待全部处理过程的完成。
             await Task.WhenAll(processingTasks);
             btnDown.Enabled = true;
-            MessageBox.Show("下载完毕", "Finished.", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            LogView.Items.Add($"[Main|{DateTime.Now.ToString("g")}] {successCount} 项歌曲的歌词已成功下载。");
         }
 
         private void BtnDown_Click(object sender, EventArgs e)
